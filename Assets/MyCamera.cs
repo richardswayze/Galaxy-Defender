@@ -15,8 +15,14 @@ public class MyCamera : MonoBehaviour {
 	
 	// Update is called once per frame
 	void LateUpdate () {
-        Vector3 cameraPos = new Vector3 (player.transform.position.x, player.transform.position.y, cameraToPlayerDistance);
-        transform.position = (cameraPos);
-        transform.LookAt(player.transform);
+        if (player)
+        {
+            Vector3 cameraPos = new Vector3(player.transform.position.x, player.transform.position.y, cameraToPlayerDistance);
+            transform.position = (cameraPos);
+            transform.LookAt(player.transform);
+        } else
+        {
+            player = FindObjectOfType<Player>();
+        }   
 	}
 }

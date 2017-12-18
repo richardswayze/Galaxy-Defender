@@ -90,6 +90,8 @@
     <Compile Include="Assets\Enemy\Enemy.cs" />
     <Compile Include="Assets\Enemy\EnemyParent.cs" />
     <Compile Include="Assets\Enemy\EnemyStats.cs" />
+    <Compile Include="Assets\EnemyLaser.cs" />
+    <Compile Include="Assets\GameManager.cs" />
     <Compile Include="Assets\MyCamera.cs" />
     <Compile Include="Assets\Player\Laser.cs" />
     <Compile Include="Assets\Player\LaserStats.cs" />

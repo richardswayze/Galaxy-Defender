@@ -7,7 +7,10 @@ public class EnemyStats : MonoBehaviour {
     public float speed;
     public int minimumDistanceToPlayer;
     public int health;
-    public int weaponDamage;
+    public int collisionDamage;
+    public float firingDistance;
+    public float fireRate;
+    public int accuracy;
 
 
 	// Use this for initialization

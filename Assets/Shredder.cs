@@ -23,5 +23,13 @@ public class Shredder : MonoBehaviour {
         {
             Destroy(collider.gameObject);
         }
+        if (collider.GetComponent<LaserStats>())
+        {
+            Destroy(collider.gameObject);
+        }
+        if (collider.GetComponent<EnemyLaser>())
+        {
+            Destroy(collider.gameObject);
+        }
     }
 }

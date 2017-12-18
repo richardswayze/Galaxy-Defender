@@ -8,14 +8,13 @@ public class Player : MonoBehaviour {
 
     [SerializeField] int health = 5;
     [SerializeField] int maxShield = 7;
-    [SerializeField] int lives = 3;
     [SerializeField] bool vulnerable = true;
     [SerializeField] int moveSpeed;
     [SerializeField] GameObject[] laserPrefabs;
     [SerializeField] float shieldRechargeWait;
     [SerializeField] float shieldRechargeRate;
     [SerializeField] float shieldRechargeSpeed;
-    [SerializeField] int collisionDamage;
+    [SerializeField] int respawnTime;
 
     public int currentLaser;
     public float shield;
@@ -34,6 +33,8 @@ public class Player : MonoBehaviour {
     private float timeSinceCollision;
     private Text shieldText;
     private Text healthText;
+    private EnemyParent enemyParent;
+    private GameManager gameManager;
 
 
     void Start()
@@ -48,6 +49,8 @@ public class Player : MonoBehaviour {
         shield = maxShield;
         shieldText = GameObject.Find("Shield").GetComponent<Text>();
         healthText = GameObject.Find("Health").GetComponent<Text>();
+        enemyParent = GameObject.FindObjectOfType<EnemyParent>();
+        gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 
     void Update()
@@ -90,8 +93,11 @@ public class Player : MonoBehaviour {
                 InvokeRepeating("RechargeShield", .01f, shieldRechargeSpeed);
             }
         }
+
         shieldText.text = Mathf.RoundToInt(shield).ToString();
         healthText.text = health.ToString();
+
+
     }
 
     void RechargeShield()
@@ -121,6 +127,7 @@ public class Player : MonoBehaviour {
         collisionTime = Time.time;
         if (collider.GetComponent<Enemy>())
         {
+            int collisionDamage = collider.GetComponent<EnemyStats>().collisionDamage;
             if (shield > 0)
             {
                 shield -= collisionDamage;
@@ -133,33 +140,39 @@ public class Player : MonoBehaviour {
                 health -= collisionDamage;
             }
         }
-        //Enemy laser damage. Needs info for enemy laser object/script
 
-        //if (collider.GetComponent<LaserStats>())
-        //{
-        //    EnemyStats enemy = collider.GetComponent<EnemyStats>();
-        //    int damageApplied = enemy.weaponDamage;
-        //    if (shield > 0)
-        //    {
-        //        shield -= damageApplied;
-        //        if (shield < 0)
-        //        {
-        //            shield = 0;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        health -= damageApplied;
-        //    }
-        //}
+        if (collider.GetComponent<EnemyLaser>())
+            {
+                EnemyLaser laser = collider.GetComponent<EnemyLaser>();
+                int damageApplied = laser.damage;
+                if (shield > 0)
+                {
+                    shield -= damageApplied;
+                    if (shield < 0)
+                    {
+                        shield = 0;
+                    }
+                }
+                else
+                {
+                    health -= damageApplied;
+                }
+            }
+        Destroy(collider.gameObject);
     }
 
     void PlayerDeath()
     {
-        lives -= 1;
-        if (lives < 0)
+        gameManager.lives -= 1;
+        if (gameManager.lives < 0)
         {
             EndGame();
+        } else
+        {
+            Debug.Log("Let's invoke.");
+            gameManager.respawnLoc = transform.position;
+            gameManager.Invoke("Respawn", respawnTime);
+
         }
         Destroy(gameObject);
         }
