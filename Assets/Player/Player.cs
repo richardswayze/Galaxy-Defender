@@ -24,7 +24,7 @@ public class Player : MonoBehaviour {
     private float p_rightHoriz;
     private float p_rightVert;
     private Vector3 p_move = new Vector3();
-    private Transform sprite;
+    private Transform playerShip;
     private Transform cannon;
     private float timeFired;
     private bool canFire;
@@ -39,8 +39,8 @@ public class Player : MonoBehaviour {
 
     void Start()
     {
-        sprite = GameObject.Find("Sprite").GetComponent<Transform>();
-        currentLaser = 1;
+        playerShip = GameObject.Find("playership").GetComponent<Transform>();
+        currentLaser = 0;
         cannon = GameObject.Find("Cannon").GetComponent<Transform>();
         canFire = true;
         laserStats = laserPrefabs[currentLaser].GetComponent<LaserStats>();
@@ -72,8 +72,8 @@ public class Player : MonoBehaviour {
         //Player model rotation
         if (p_move.x != 0 || p_move.y != 0)
         {
-            float tangent = Mathf.Atan2(p_move.y, p_move.x) * Mathf.Rad2Deg - 90;
-            sprite.transform.rotation = Quaternion.AngleAxis(tangent, Vector3.forward);
+            float tangent = Mathf.Atan2(p_move.y, p_move.x) * Mathf.Rad2Deg + 90;
+            playerShip.transform.rotation = Quaternion.AngleAxis(tangent, Vector3.forward);
         }
 
         //Rotates direction of fire and fires laser

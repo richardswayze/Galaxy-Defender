@@ -17,7 +17,7 @@ public class Spawner : MonoBehaviour {
     void Start () {
         enemyParent = GameObject.Find("Enemy Parent").GetComponent<EnemyParent>();
         spawners = GameObject.Find("Spawners").GetComponentsInChildren<Transform>();
-        InvokeRepeating("SpawnEnemies", .001f, spawnRate);
+        //InvokeRepeating("SpawnEnemies", .001f, spawnRate);
         
 	}
 	

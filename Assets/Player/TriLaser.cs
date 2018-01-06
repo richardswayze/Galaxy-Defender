@@ -27,21 +27,24 @@ public class TriLaser : MonoBehaviour {
         //Alter trajectories for diagonal shots
         Rigidbody[] lasersRigidBody = GetComponentsInChildren<Rigidbody>();
         Vector3 vectorLeft = new Vector3();
-        vectorLeft = Quaternion.AngleAxis(18, Vector3.forward) * trajectory;
+        vectorLeft = Quaternion.AngleAxis(20, Vector3.forward) * trajectory;
         Vector3 vectorRight = new Vector3();
-        vectorRight = Quaternion.AngleAxis(-18, Vector3.forward) * trajectory;
+        vectorRight = Quaternion.AngleAxis(-20, Vector3.forward) * trajectory;
 
-        //Rotate (in future if necessary
+        
+
+        //Rotate (in future if necessary)
 
         //Fire lasers with their trajectories
         lasersRigidBody[0].velocity = trajectory * speed;
         lasersRigidBody[1].velocity = vectorLeft * speed;
         lasersRigidBody[2].velocity = vectorRight * speed;
+
+
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
 	}
 
     
