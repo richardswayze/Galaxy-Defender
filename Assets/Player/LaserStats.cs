@@ -22,9 +22,9 @@ public class LaserStats : MonoBehaviour {
 
     private void OnTriggerEnter(Collider collider)
     {
-        if (collider.GetComponent<EnemyStats>())  
+        if (collider.GetComponent<Enemy>())  
         {
-            EnemyStats enemy = collider.GetComponent<EnemyStats>();
+            Enemy enemy = collider.GetComponent<Enemy>();
             enemy.health -= damage;
             Destroy(gameObject);
         }

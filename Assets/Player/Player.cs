@@ -10,14 +10,14 @@ public class Player : MonoBehaviour {
     [SerializeField] int maxShield = 7;
     [SerializeField] bool vulnerable = true;
     [SerializeField] int moveSpeed;
-    [SerializeField] GameObject[] laserPrefabs;
     [SerializeField] float shieldRechargeWait;
     [SerializeField] float shieldRechargeRate;
-    [SerializeField] float shieldRechargeSpeed;
-    [SerializeField] int respawnTime;
 
     public int currentLaser;
     public float shield;
+    public LaserStats laserStats;
+    public GameObject[] laserPrefabs;
+    public GameObject deathFX;
 
     private float p_horiz;
     private float p_vert;
@@ -28,12 +28,10 @@ public class Player : MonoBehaviour {
     private Transform cannon;
     private float timeFired;
     private bool canFire;
-    private LaserStats laserStats;
     private float collisionTime;
     private float timeSinceCollision;
     private Text shieldText;
     private Text healthText;
-    private EnemyParent enemyParent;
     private GameManager gameManager;
 
 
@@ -43,18 +41,18 @@ public class Player : MonoBehaviour {
         currentLaser = 0;
         cannon = GameObject.Find("Cannon").GetComponent<Transform>();
         canFire = true;
-        laserStats = laserPrefabs[currentLaser].GetComponent<LaserStats>();
         collisionTime = 0;
         timeSinceCollision = collisionTime - Time.timeSinceLevelLoad;
         shield = maxShield;
         shieldText = GameObject.Find("Shield").GetComponent<Text>();
         healthText = GameObject.Find("Health").GetComponent<Text>();
-        enemyParent = GameObject.FindObjectOfType<EnemyParent>();
         gameManager = GameObject.FindObjectOfType<GameManager>();
+        laserStats = laserPrefabs[currentLaser].GetComponent<LaserStats>();
     }
 
     void Update()
     {
+        Debug.Log(shield);
         //Player movement
         p_move.x = CrossPlatformInputManager.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
         p_move.y = CrossPlatformInputManager.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
@@ -90,7 +88,7 @@ public class Player : MonoBehaviour {
             timeSinceCollision = Time.time - collisionTime;
             if (timeSinceCollision >= shieldRechargeWait)
             {
-                InvokeRepeating("RechargeShield", .01f, shieldRechargeSpeed);
+                RechargeShield();
             }
         }
 
@@ -114,6 +112,7 @@ public class Player : MonoBehaviour {
     //Fires laser checking if time since last fired laser has been longer than fireRate
     void FireLaser()
     {
+
         if (Time.time - timeFired >= laserStats.fireRate || canFire)
         {
             Instantiate(laserPrefabs[currentLaser], cannon.transform.position, Quaternion.identity);
@@ -124,24 +123,32 @@ public class Player : MonoBehaviour {
 
     void OnTriggerEnter(Collider collider)
     {
-        collisionTime = Time.time;
-        if (collider.GetComponent<Enemy>())
+        // Checkes if player in vulnerable state, then sorts into laser or collision damage
+        if (vulnerable)
         {
-            int collisionDamage = collider.GetComponent<EnemyStats>().collisionDamage;
-            if (shield > 0)
-            {
-                shield -= collisionDamage;
-                if (shield < 0)
-                {
-                    shield = 0;
-                }
-            } else
-            {
-                health -= collisionDamage;
-            }
-        }
+            CancelInvoke("RechargeShield");
+            collisionTime = Time.time;
 
-        if (collider.GetComponent<EnemyLaser>())
+            // Collision damage
+            if (collider.GetComponent<Enemy>())
+            {
+                int collisionDamage = collider.GetComponent<Enemy>().collisionDamage;
+                if (shield > 0)
+                {
+                    shield -= collisionDamage;
+                    if (shield < 0)
+                    {
+                        shield = 0;
+                    }
+                }
+                else
+                {
+                    health -= collisionDamage;
+                }
+            }
+
+            // Laser damage
+            if (collider.GetComponent<EnemyLaser>())
             {
                 EnemyLaser laser = collider.GetComponent<EnemyLaser>();
                 int damageApplied = laser.damage;
@@ -157,28 +164,25 @@ public class Player : MonoBehaviour {
                 {
                     health -= damageApplied;
                 }
+                Destroy(collider.gameObject);
             }
-        Destroy(collider.gameObject);
+        }
+        
+        
     }
 
     void PlayerDeath()
     {
+        Instantiate(deathFX, transform.position, Quaternion.identity);
         gameManager.lives -= 1;
         if (gameManager.lives < 0)
         {
-            EndGame();
+            gameManager.GameOver();
         } else
         {
-            Debug.Log("Let's invoke.");
             gameManager.respawnLoc = transform.position;
-            gameManager.Invoke("Respawn", respawnTime);
-
+            gameManager.Invoke("Respawn", gameManager.respawnTime);
         }
         Destroy(gameObject);
-        }
-
-    void EndGame()
-    {
-        print("Game has ended.");
     }
 }

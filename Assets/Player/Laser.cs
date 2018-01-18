@@ -9,11 +9,9 @@ public class Laser : MonoBehaviour {
     private Rigidbody rigidBody;
     private Transform cannon;
     private LaserStats laserStats;
-    private Player player;
 
     // Use this for initialization
     void Start () {
-        player = GameObject.FindObjectOfType<Player>();
         cannon = GameObject.Find("Cannon").GetComponent<Transform>();
         transform.rotation = cannon.GetComponent<Transform>().rotation;
         laserStats = GetComponent<LaserStats>();

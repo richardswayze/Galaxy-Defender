@@ -6,13 +6,16 @@ public class EnemyParent : MonoBehaviour {
 
     public int enemyCount;
 
-	// Use this for initialization
-	void Start () {
-        enemyCount = 0;
+    private Enemy[] enemies;
+
+    // Use this for initialization
+    void Start () {
+		
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+        enemies = gameObject.GetComponentsInChildren<Enemy>();
+        enemyCount = enemies.Length;
 	}
 }

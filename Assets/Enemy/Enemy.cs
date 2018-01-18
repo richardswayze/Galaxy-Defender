@@ -5,39 +5,42 @@ using UnityEngine;
 public class Enemy : MonoBehaviour {
 
     public GameObject laser;
+    public GameObject prefabFX;
 
-    private Player player;
-    private EnemyStats enemy;
+    public float speed;
+    public int minimumDistanceToPlayer;
+    public int health;
+    public int collisionDamage;
+    public float firingDistance;
+    public float fireRate;
+    public int accuracy;
+    public Player player;
+    public int scoreToAdd;
+    public GameObject[] itemPool;
+
     private EnemyParent enemyParent;
-    private Rigidbody rigidBody;
-    float speed;
+    private GameManager gameManager;
+
     float step;
-    float firingDistance;
     int minimumDistance;
     Vector3 playerPos = new Vector3();
     public Vector3 destination = new Vector3();
     float distanceToPlayer;
-    float fireRate;
     bool inDistance;
     float timeShot;
-    int accuracy;
     Vector3 startingPos;
 
     // Use this for initialization
     void Start () {
         enemyParent = GameObject.FindObjectOfType<EnemyParent>();
-        enemy = GetComponent<EnemyStats>();
+        enemyParent.enemyCount++;
         transform.parent = enemyParent.transform;
         enemyParent.enemyCount++;
-        rigidBody = GetComponent<Rigidbody>();
-        speed = enemy.speed;
         player = GameObject.FindObjectOfType<Player>();
         step = speed * Time.deltaTime;
-        minimumDistance = enemy.minimumDistanceToPlayer;
         destination = RandomPos() + playerPos;
-        firingDistance = enemy.firingDistance;
-        fireRate = enemy.fireRate;
         startingPos = transform.position;
+        gameManager = GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>();
     }
 
 
@@ -73,12 +76,21 @@ public class Enemy : MonoBehaviour {
             //Player is dead, returns enemies to spawning location until player respawns
             Scatter();
         }
-         
+
+        if (health <= 0)
+        {
+            Instantiate(prefabFX, transform.position, Quaternion.identity);
+            enemyParent.enemyCount--;
+            gameManager.playerScore += scoreToAdd;
+            gameManager.GenerateLoot(transform.position);
+            Destroy(gameObject);
+        }
+
     }
 
     Vector3 RandomPos()
     {
-        Vector3 randomPos = new Vector3(Random.Range(-minimumDistance, minimumDistance + 1), Random.Range(-minimumDistance, minimumDistance + 1), 0f);
+        Vector3 randomPos = new Vector3(Random.Range(-minimumDistanceToPlayer, minimumDistanceToPlayer + 1), Random.Range(-minimumDistanceToPlayer, minimumDistanceToPlayer + 1), 0f);
         return randomPos;
     }
 
@@ -95,4 +107,12 @@ public class Enemy : MonoBehaviour {
         transform.rotation = Quaternion.Euler(0f, 0f, rotZ);
     }
 
+    void OnTriggerEnter(Collider collider)
+    {
+        if (collider.GetComponent<Player>())
+        {
+            health = -1;
+        }
+
+    }
 }
