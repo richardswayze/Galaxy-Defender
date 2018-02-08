@@ -6,14 +6,21 @@ public class WeaponPickup : MonoBehaviour {
 
     private Player player;
 
+    private float decayTime;
+    private float creationTime;
+
 	// Use this for initialization
 	void Start () {
-
+        decayTime = 7;
+        creationTime = Time.time;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (Time.time - creationTime >= decayTime)
+        {
+            Destroy(gameObject);
+        }
 	}
 
     void OnTriggerEnter(Collider other)

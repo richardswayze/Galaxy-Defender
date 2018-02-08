@@ -89,8 +89,10 @@
   <ItemGroup>
     <Compile Include="Assets\DeathFX.cs" />
     <Compile Include="Assets\Enemy\Enemy.cs" />
+    <Compile Include="Assets\Enemy\EnemyLaser.cs" />
     <Compile Include="Assets\Enemy\EnemyParent.cs" />
-    <Compile Include="Assets\EnemyLaser.cs" />
+    <Compile Include="Assets\Enemy\Kamikaze.cs" />
+    <Compile Include="Assets\Enemy\StandardEnemy.cs" />
     <Compile Include="Assets\GameManager.cs" />
     <Compile Include="Assets\MyCamera.cs" />
     <Compile Include="Assets\Player\Laser.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="Assets\Player\TriLaser.cs" />
     <Compile Include="Assets\Shredder.cs" />
     <Compile Include="Assets\Spawner.cs" />
+    <Compile Include="Assets\SwarmCarrier.cs" />
     <Compile Include="Assets\WeaponPickup.cs" />
   </ItemGroup>
   <ItemGroup>

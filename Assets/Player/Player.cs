@@ -18,6 +18,7 @@ public class Player : MonoBehaviour {
     public LaserStats laserStats;
     public GameObject[] laserPrefabs;
     public GameObject deathFX;
+    public GameObject laserDamagePrefab;
 
     private float p_horiz;
     private float p_vert;
@@ -45,23 +46,30 @@ public class Player : MonoBehaviour {
         timeSinceCollision = collisionTime - Time.timeSinceLevelLoad;
         shield = maxShield;
         shieldText = GameObject.Find("Shield").GetComponent<Text>();
+        shieldText.enabled = false;
         healthText = GameObject.Find("Health").GetComponent<Text>();
+        healthText.enabled = false;
         gameManager = GameObject.FindObjectOfType<GameManager>();
         laserStats = laserPrefabs[currentLaser].GetComponent<LaserStats>();
     }
 
     void Update()
     {
-        Debug.Log(shield);
-        //Player movement
-        p_move.x = CrossPlatformInputManager.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
-        p_move.y = CrossPlatformInputManager.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
-        transform.position = new Vector3(Mathf.Clamp(transform.position.x + p_move.x, -80f, 80f), Mathf.Clamp(transform.position.y + p_move.y, -50f, 50f), 0f);
-        
-        //Right stick input
-        p_rightHoriz = CrossPlatformInputManager.GetAxis("R Horiz");
-        p_rightVert = CrossPlatformInputManager.GetAxis("R Vert");
-       
+        if(gameManager.gameStarted == true)
+        {
+            //Player movement
+            p_move.x = CrossPlatformInputManager.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
+            p_move.y = CrossPlatformInputManager.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
+            transform.position = new Vector3(Mathf.Clamp(transform.position.x + p_move.x, -80f, 80f), Mathf.Clamp(transform.position.y + p_move.y, -50f, 50f), 0f);
+
+            //Right stick input
+            p_rightHoriz = CrossPlatformInputManager.GetAxis("R Horiz");
+            p_rightVert = CrossPlatformInputManager.GetAxis("R Vert");
+
+            shieldText.enabled = true;
+            healthText.enabled = true;
+        }
+
         if (health <= 0)
         {
             PlayerDeath();
@@ -155,6 +163,7 @@ public class Player : MonoBehaviour {
                 if (shield > 0)
                 {
                     shield -= damageApplied;
+                    Instantiate(laserDamagePrefab, transform.position, Quaternion.identity);
                     if (shield < 0)
                     {
                         shield = 0;

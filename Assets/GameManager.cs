@@ -14,26 +14,35 @@ public class GameManager : MonoBehaviour {
     }
 
     public List<LootTable> lootTable = new List<LootTable>();
-    public int lives = 3;
+    public int lives;
     public GameObject playerPrefab;
     public Vector3 respawnLoc;
-    public int playerScore = 0;
+    public int playerScore;
     public int startDelay;
     public int respawnTime;
     public int dropChance;
+    public bool gameStarted;
 
     private EnemyParent enemyParent;
     private Text scoreDisplay;
     private Text debugDisplay;
     private Spawner[] spawners;
+    private Text startButton;
+    private Text gameOver;
+    private Vector3 playerOrigin;
 
 	// Use this for initialization
 	void Start () {
+        playerOrigin = GameObject.FindObjectOfType<Player>().GetComponent<Transform>().position;
         enemyParent = GameObject.Find("Enemy Parent").GetComponent<EnemyParent>();
         scoreDisplay = GameObject.Find("Score").GetComponent<Text>();
+        scoreDisplay.enabled = false;
         debugDisplay = GameObject.Find("Debug").GetComponent<Text>();
+        startButton = GameObject.Find("Start Game").GetComponent<Text>();
+        gameStarted = false; 
+        gameOver = GameObject.Find("Game Over").GetComponent<Text>();
+        gameOver.enabled = false;
         spawners = GameObject.Find("Spawners").GetComponentsInChildren<Spawner>();
-        Invoke("StartWave", startDelay);
     }
 	
 	// Update is called once per frame
@@ -63,7 +72,9 @@ public class GameManager : MonoBehaviour {
 
     public void GameOver()
     {
-        Debug.Log("Game Over");
+        gameStarted = false;
+        gameOver.enabled = true;
+        CancelInvoke("StartWave");
     }
 
     public void GenerateLoot(Vector3 location)
@@ -88,6 +99,27 @@ public class GameManager : MonoBehaviour {
                 Instantiate(lootTable[i].item, location, Quaternion.identity);
                 return;
             }
+        }
+    }
+
+    public void StartGame()
+    {
+        startButton.enabled = false;
+        lives = 3;
+        playerScore = 0;
+        Invoke("StartWave", startDelay);
+        scoreDisplay.enabled = true;
+    }
+
+    public void Reset()
+    {
+        Instantiate(playerPrefab, playerOrigin, Quaternion.identity);
+        startButton.enabled = true;
+        scoreDisplay.enabled = false;
+        GameObject[] enemies = enemyParent.GetComponentsInChildren<GameObject>();
+        foreach (GameObject thisEnemy in enemies)
+        {
+            Destroy(thisEnemy.gameObject);
         }
     }
 }
