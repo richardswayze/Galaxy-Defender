@@ -22,6 +22,8 @@ public class GameManager : MonoBehaviour {
     public int respawnTime;
     public int dropChance;
     public bool gameStarted;
+    public bool playerDead;
+    public Animator camAnim;
 
     private EnemyParent enemyParent;
     private Text scoreDisplay;
@@ -30,6 +32,9 @@ public class GameManager : MonoBehaviour {
     private Text startButton;
     private Text gameOver;
     private Vector3 playerOrigin;
+    private Text livesText;
+    private AudioSource audioSource;
+    private Text reset;
 
 	// Use this for initialization
 	void Start () {
@@ -43,18 +48,28 @@ public class GameManager : MonoBehaviour {
         gameOver = GameObject.Find("Game Over").GetComponent<Text>();
         gameOver.enabled = false;
         spawners = GameObject.Find("Spawners").GetComponentsInChildren<Spawner>();
+        playerDead = false;
+        livesText = GameObject.Find("Lives").GetComponent<Text>();
+        livesText.enabled = false;
+        audioSource = GetComponent<AudioSource>();
+        reset = GameObject.Find("Main Menu").GetComponent<Text>();
+        reset.enabled = false;
     }
 	
 	// Update is called once per frame
 	void Update () {
         scoreDisplay.text = playerScore.ToString();
         debugDisplay.text = "ECount" + enemyParent.enemyCount.ToString() + " " +
-                            "SRate" + spawners[1].spawnRate;
+                            "SRate" + spawners[1].spawnRate + " " +
+                            "PlayTime" + spawners[1].playTime;
+                            
+        livesText.text = "Lives: " + lives.ToString();
 	}
 
     public void Respawn()
     {
         Instantiate(playerPrefab, respawnLoc, Quaternion.identity);
+        playerDead = false;
         Enemy[] enemyChildren = enemyParent.GetComponentsInChildren<Enemy>();
         foreach (Enemy thisEnemy in enemyChildren)
         {
@@ -66,6 +81,7 @@ public class GameManager : MonoBehaviour {
     {
         foreach(Spawner thisSpawner in spawners)
         {
+            thisSpawner.startTime = Time.time;
             thisSpawner.SpawnWave();
         }
     }
@@ -74,7 +90,9 @@ public class GameManager : MonoBehaviour {
     {
         gameStarted = false;
         gameOver.enabled = true;
-        CancelInvoke("StartWave");
+        //CancelInvoke("StartWave");
+        livesText.enabled = false;
+        reset.enabled = true;
     }
 
     public void GenerateLoot(Vector3 location)
@@ -104,11 +122,14 @@ public class GameManager : MonoBehaviour {
 
     public void StartGame()
     {
+        gameStarted = true;
         startButton.enabled = false;
         lives = 3;
         playerScore = 0;
         Invoke("StartWave", startDelay);
         scoreDisplay.enabled = true;
+        livesText.enabled = true;
+        audioSource.Play();
     }
 
     public void Reset()
@@ -116,6 +137,9 @@ public class GameManager : MonoBehaviour {
         Instantiate(playerPrefab, playerOrigin, Quaternion.identity);
         startButton.enabled = true;
         scoreDisplay.enabled = false;
+        reset.enabled = false;
+        gameOver.enabled = false;
+        camAnim.SetTrigger("MoveToIdle");
         GameObject[] enemies = enemyParent.GetComponentsInChildren<GameObject>();
         foreach (GameObject thisEnemy in enemies)
         {

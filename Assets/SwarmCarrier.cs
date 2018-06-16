@@ -7,6 +7,12 @@ public class SwarmCarrier : MonoBehaviour
 
     public Vector3 destination = new Vector3();
     public GameObject laser;
+    public GameObject swarmPrefab;
+    public float distanceToSpawn;
+    public int spawnRate;
+    public int spawnCount;
+    public int maxSpawn;
+    public Vector3 startingPos;
 
     private Player player;
     private Vector3 playerPos = new Vector3();
@@ -16,7 +22,8 @@ public class SwarmCarrier : MonoBehaviour
     private float fireRate;
     private float firingDistance;
     private float timeShot;
-    private Vector3 startingPos;
+    private GameManager gameManager;
+    private float lastSpawnTime;
 
     // Use this for initialization
     void Start()
@@ -28,11 +35,16 @@ public class SwarmCarrier : MonoBehaviour
         fireRate = enemy.fireRate;
         firingDistance = enemy.firingDistance;
         minimumDistanceToPlayer = enemy.minimumDistanceToPlayer;
+        gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!player && gameManager.playerDead == false)
+        {
+            player = GameObject.FindObjectOfType<Player>();
+        }
         if (player)
         {
             playerPos = player.transform.position;
@@ -53,13 +65,17 @@ public class SwarmCarrier : MonoBehaviour
                 transform.position = Vector3.MoveTowards(transform.position, destination, step);
             }
 
+            if (Vector3.Distance(transform.position, playerPos) < distanceToSpawn && Time.time - lastSpawnTime > spawnRate && spawnCount < maxSpawn)
+            {
+                SpawnShip();
+            }
             //Random firing at player
             if (Vector3.Distance(transform.position, playerPos) < firingDistance && Time.time - timeShot > fireRate)
             {
                 Fire();
             }
         }
-        else
+        if (gameManager.playerDead == true)
         {
             //Player is dead, returns enemies to spawning location until player respawns
             Scatter();
@@ -83,15 +99,13 @@ public class SwarmCarrier : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, startingPos, step);
         float rotZ = Mathf.Atan2(startingPos.y - transform.position.y, startingPos.x - transform.position.x) * Mathf.Rad2Deg + 90;
         transform.rotation = Quaternion.Euler(0f, 0f, rotZ);
-        InvokeRepeating("FindPlayer", 1, 2);
     }
 
-    void FindPlayer()
+    void SpawnShip()
     {
-        player = GameObject.FindObjectOfType<Player>();
-        if (player)
-        {
-            CancelInvoke();
-        }
+        GameObject newSwarmShip = Instantiate(swarmPrefab, transform.position, Quaternion.identity);
+        newSwarmShip.transform.parent = transform;
+        lastSpawnTime = Time.time;
+        spawnCount += 1;
     }
 }

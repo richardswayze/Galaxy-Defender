@@ -17,6 +17,7 @@ public class StandardEnemy : MonoBehaviour {
     private float firingDistance;
     private float minimumDistanceToPlayer;
     private Enemy enemy;
+    private GameManager gameManager;
 
     // Use this for initialization
     void Start() {
@@ -27,11 +28,16 @@ public class StandardEnemy : MonoBehaviour {
         fireRate = enemy.fireRate;
         firingDistance = enemy.firingDistance;
         minimumDistanceToPlayer = enemy.minimumDistanceToPlayer;
+        gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
     void Update() {
-        if (player)
+        if (!player && gameManager.playerDead == false)
+        {
+            player = GameObject.FindObjectOfType<Player>();
+        }
+        if (gameManager.playerDead == false)
         {
             playerPos = player.transform.position;
 
@@ -57,11 +63,12 @@ public class StandardEnemy : MonoBehaviour {
                 Fire();
             }
         }
-        else
+        if (gameManager.playerDead == true)
         {
             //Player is dead, returns enemies to spawning location until player respawns
             Scatter();
         }
+        
     }
 
         Vector3 RandomPos()
@@ -81,15 +88,5 @@ public class StandardEnemy : MonoBehaviour {
         transform.position = Vector3.MoveTowards(transform.position, startingPos, step);
         float rotZ = Mathf.Atan2(startingPos.y - transform.position.y, startingPos.x - transform.position.x) * Mathf.Rad2Deg + 90;
         transform.rotation = Quaternion.Euler(0f, 0f, rotZ);
-        InvokeRepeating("FindPlayer", 1, 2);
-    }
-
-    void FindPlayer()
-    {
-        player = GameObject.FindObjectOfType<Player>();
-        if (player)
-        {
-            CancelInvoke();
-        }
     }
 }

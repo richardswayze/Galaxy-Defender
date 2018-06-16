@@ -15,13 +15,18 @@ public class Spawner : MonoBehaviour {
     public float spawnRate;
     public GameObject[] enemyPrefabs;
     public List<EnemyTable> enemytable = new List<EnemyTable>();
-    
+    public float startTime;
+    public float playTime;
+
     private EnemyParent enemyParent;
+    private float startingSpawnRate;
+    private float newRate;
+
    
     // Use this for initialization
     void Start () {
         enemyParent = GameObject.FindObjectOfType<EnemyParent>().GetComponent<EnemyParent>();
-
+        startingSpawnRate = spawnRate;
         //InvokeRepeating("SpawnEndlessEnemies", .001f, spawnRate);
         
 	}
@@ -40,6 +45,9 @@ public class Spawner : MonoBehaviour {
             {
                 Instantiate(enemytable[i].enemyPrefab, transform.position, Quaternion.identity);
                 return;
+            } else
+            {
+                spawnLot -= enemytable[i].rarity;
             }
         }
     }
@@ -75,10 +83,20 @@ public class Spawner : MonoBehaviour {
 
 
         //Spawn rate decreses by .25 seconds every wave
-        if (spawnRate >= 4.25f)
+        if (spawnRate >= 3f)
         {
-            float rateDecreaase = .25f;
-            spawnRate = spawnRate - rateDecreaase;
+            playTime = (Time.time - startTime);
+            newRate = (-1f / 720f) * (playTime * playTime) + startingSpawnRate;
+            if (newRate >= 3f)
+            {
+                spawnRate = newRate;
+            } else
+            {
+                spawnRate = 3f;
+            }
+            
+            //float rateDecreaase = .25f;
+            //spawnRate = spawnRate - rateDecreaase;
         }
 
         if (enemyParent.enemyCount > 70)

@@ -13,7 +13,6 @@ public class Enemy : MonoBehaviour
     public float fireRate;
     public int accuracy;
     public int scoreToAdd;
-    public GameObject[] itemPool;
     public int minimumDistanceToPlayer;
     public Player player;
 
@@ -27,7 +26,10 @@ public class Enemy : MonoBehaviour
     {
         enemyParent = GameObject.FindObjectOfType<EnemyParent>();
         enemyParent.enemyCount++;
-        transform.parent = enemyParent.transform;
+        if (!GetComponent<SwarmCraft>())
+        {
+            transform.parent = enemyParent.transform;
+        }
         enemyParent.enemyCount++;
         player = GameObject.FindObjectOfType<Player>();
         gameManager = GameObject.FindObjectOfType<GameManager>().GetComponent<GameManager>();
@@ -39,7 +41,10 @@ public class Enemy : MonoBehaviour
             Instantiate(prefabFX, transform.position, Quaternion.identity);
             enemyParent.enemyCount--;
             gameManager.playerScore += scoreToAdd;
-            gameManager.GenerateLoot(transform.position);
+            if (!gameObject.GetComponent<SwarmCraft>())
+            {
+                gameManager.GenerateLoot(transform.position);
+            }
             Destroy(gameObject);
         }
     }

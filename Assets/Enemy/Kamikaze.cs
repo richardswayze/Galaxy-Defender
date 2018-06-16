@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Kamikaze : MonoBehaviour {
 
+    [SerializeField] float blastRadius;
+    [SerializeField] int blastDamage;
+
     private Enemy enemy;
     private bool triggered;
     private Player player;
@@ -17,10 +20,12 @@ public class Kamikaze : MonoBehaviour {
     private float minimumDistanceToPlayer;
     private Vector3 startingPos;
     private float timeShot;
+    private GameManager gameManager;
 
     public float rangeToDetonate;
     public int ramSpeed;
     public GameObject laser;
+    
 
     // Use this for initialization
     void Start () {
@@ -32,11 +37,15 @@ public class Kamikaze : MonoBehaviour {
         minimumDistanceToPlayer = enemy.minimumDistanceToPlayer;
         step = enemy.speed * Time.deltaTime;
         startingPos = transform.position;
+        gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 	
 	// Update is called once per frame
 	void Update () {
-
+        if (!player && gameManager.playerDead == false)
+        {
+            player = GameObject.FindObjectOfType<Player>();
+        }
         if (player && !triggered)
         {
             playerPos = player.transform.position;
@@ -69,14 +78,24 @@ public class Kamikaze : MonoBehaviour {
             step = ramSpeed * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position, playerLoc, step);
             detonationRange = Mathf.Abs(Vector3.Distance(transform.position, playerLoc));
-            Debug.Log(detonationRange);
             if (detonationRange <= rangeToDetonate)
             {
                 Instantiate(enemy.prefabFX, transform.position, Quaternion.identity);
+                if (Vector3.Distance(transform.position, player.transform.position) <= blastRadius)
+                {
+                    Debug.Log("Player in blast");
+                    if (player.shield <= 0)
+                    {
+                        player.health -= blastDamage;
+                    } else
+                    {
+                        player.shield -= blastDamage;
+                    }  
+                }
                 Destroy(gameObject);
             }
         }
-        else 
+        if (gameManager.playerDead == true) 
         {
             //Player is dead, returns enemies to spawning location until player respawns
             Scatter();
@@ -88,7 +107,6 @@ public class Kamikaze : MonoBehaviour {
         if (!triggered && other.GetComponent<LaserStats>())
         {
             triggered = true;
-            player = GameObject.FindObjectOfType<Player>();
             playerLoc = player.transform.position;
         }
     }
@@ -98,7 +116,6 @@ public class Kamikaze : MonoBehaviour {
         transform.position = Vector3.MoveTowards(transform.position, startingPos, step);
         float rotZ = Mathf.Atan2(startingPos.y - transform.position.y, startingPos.x - transform.position.x) * Mathf.Rad2Deg + 90;
         transform.rotation = Quaternion.Euler(0f, 0f, rotZ);
-        InvokeRepeating("FindPlayer", 1, 2);
     }
 
     Vector3 RandomPos()
@@ -113,13 +130,9 @@ public class Kamikaze : MonoBehaviour {
         Instantiate(laser, transform.position, Quaternion.identity);
     }
 
-    void FindPlayer()
+    private void OnDrawGizmos()
     {
-        player = GameObject.FindObjectOfType<Player>();
-        if (player)
-        {
-            CancelInvoke();
-        }
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, blastRadius);
     }
-
 }

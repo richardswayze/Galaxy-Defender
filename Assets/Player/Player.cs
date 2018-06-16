@@ -6,13 +6,14 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour {
 
-    [SerializeField] int health = 5;
+    
     [SerializeField] int maxShield = 7;
     [SerializeField] bool vulnerable = true;
     [SerializeField] int moveSpeed;
     [SerializeField] float shieldRechargeWait;
     [SerializeField] float shieldRechargeRate;
 
+    public int health = 5;
     public int currentLaser;
     public float shield;
     public LaserStats laserStats;
@@ -20,8 +21,6 @@ public class Player : MonoBehaviour {
     public GameObject deathFX;
     public GameObject laserDamagePrefab;
 
-    private float p_horiz;
-    private float p_vert;
     private float p_rightHoriz;
     private float p_rightVert;
     private Vector3 p_move = new Vector3();
@@ -65,6 +64,7 @@ public class Player : MonoBehaviour {
             //Right stick input
             p_rightHoriz = CrossPlatformInputManager.GetAxis("R Horiz");
             p_rightVert = CrossPlatformInputManager.GetAxis("R Vert");
+            
 
             shieldText.enabled = true;
             healthText.enabled = true;
@@ -99,11 +99,8 @@ public class Player : MonoBehaviour {
                 RechargeShield();
             }
         }
-
         shieldText.text = Mathf.RoundToInt(shield).ToString();
         healthText.text = health.ToString();
-
-
     }
 
     void RechargeShield()
@@ -111,7 +108,7 @@ public class Player : MonoBehaviour {
         shield += shieldRechargeRate;
         if (shield >= maxShield)
         {
-            CancelInvoke("RechargeShield");
+            CancelInvoke("RechargeShield"); //TODO is there an "invoke" call for this?
             shield = maxShield;
         }
 
@@ -182,6 +179,7 @@ public class Player : MonoBehaviour {
 
     void PlayerDeath()
     {
+        gameManager.playerDead = true;
         Instantiate(deathFX, transform.position, Quaternion.identity);
         gameManager.lives -= 1;
         if (gameManager.lives < 0)
